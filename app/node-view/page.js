@@ -52,6 +52,7 @@ export default function NodeView() {
   useGesture(50, (direction) => {
     if (direction === "right") router.push("/note-editor");
   });
+
   return (
     <div className="floating-edges" style={{ width: "100%", height: "100vh" }}>
       <ReactFlow
@@ -71,6 +72,55 @@ export default function NodeView() {
   );
 }
 
+function initializeNodes(notes, setNodes) {
+  const deltaDist = 200;
+  const cardHeight = 140;
+  console.log("notes", notes);
+
+  const centerNode =
+    notes && notes.length > 0
+      ? {
+          id: "c1",
+          position: { x: 0, y: 0 },
+          type: "center",
+          data: { inquiry: notes[0]?.inquiry },
+          height: cardHeight,
+        }
+      : null;
+
+  const cardNotes = notes.slice(0, 6).map((note, index) => {
+    const rotationShift = index <= 2 ? 0 : 60;
+
+    if (index >= 6) return;
+
+    return {
+      id: "n" + index,
+      position: {
+        x:
+          Math.cos(((90 + rotationShift + 120 * index) * Math.PI) / 180) *
+          deltaDist,
+        y:
+          Math.sin(((90 + rotationShift + 120 * index) * Math.PI) / 180) *
+          deltaDist,
+      },
+      type: "note",
+      data: { title: note.title, location: note.location },
+      height: cardHeight,
+    };
+  });
+  console.log("[centerNode ? [centerNode] : [], ...cardNotes]", [
+    centerNode ? [centerNode] : [],
+    ...cardNotes,
+  ]);
+  console.log("centerNode", centerNode);
+  setNodes([...(centerNode ? [centerNode] : []), ...cardNotes]);
+}
+
+const initialEdges = Array.from({ length: 6 }, (_, i) => {
+  return { id: "c1-n" + i, source: "c1", target: "n" + i, type: "floating" };
+});
+console.log("initialEdges", initialEdges);
+
 const edgeTypes = {
   floating: FloatingEdge,
 };
@@ -79,31 +129,3 @@ const nodeTypes = {
   note: CardNode,
   center: CenterNode,
 };
-
-function initializeNodes(notes, setNodes) {
-  const initialNodes = [
-    {
-      id: "n1",
-      position: { x: 0, y: 0 },
-      type: "center",
-      data: { label: "Node 1" },
-    },
-    {
-      id: "n2",
-      position: { x: 0, y: 100 },
-      type: "note",
-      data: { label: "Node 2" },
-    },
-  ];
-
-  setNodes(initialNodes);
-}
-
-const initialEdges = [
-  {
-    id: "n1-n2",
-    source: "n1",
-    target: "n2",
-    type: "floating",
-  },
-];

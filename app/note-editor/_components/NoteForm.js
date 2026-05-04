@@ -25,22 +25,6 @@ export default function NoteForm({ noteToEdit }) {
     const formDataObject = new FormData(event.target);
     const data = Object.fromEntries(formDataObject);
 
-    //---< assemble note data >---
-    const newNote = {
-      _id: !noteToEdit ? uuidv4() : noteToEdit._id,
-      location: " - ",
-      ...data,
-    };
-
-    //---< local storage handling >---
-    if (!noteToEdit) setNotes([newNote, ...notes]);
-    else
-      setNotes(
-        notes.map((note) =>
-          note._id === noteToEdit._id ? { _id: note.id, ...data } : note,
-        ),
-      );
-
     //---< reset form >---
     setFormData(formDefault);
 
@@ -60,13 +44,29 @@ export default function NoteForm({ noteToEdit }) {
       location = await res.json();
 
       if (!res.ok) {
-        location = { adress: { city: " - " } };
+        location = { address: { city: " - " } };
         throw new Error(`${res.status} - Failed to aquire location!`);
       }
     } catch (error) {
-      location = { adress: { city: " - " } };
+      location = { address: { city: " - " } };
       console.error("failed to get location", error);
     }
+
+    //---< assemble note data >---
+    const newNote = {
+      _id: !noteToEdit ? uuidv4() : noteToEdit._id,
+      location: location?.address?.city,
+      ...data,
+    };
+
+    //---< local storage handling >---
+    if (!noteToEdit) setNotes([newNote, ...notes]);
+    else
+      setNotes(
+        notes.map((note) =>
+          note._id === noteToEdit._id ? { _id: note.id, ...data } : note,
+        ),
+      );
 
     //---< database handling - "PUT" , "POST" >---
     try {
@@ -93,7 +93,7 @@ export default function NoteForm({ noteToEdit }) {
 
   function handleClearForm() {
     setFormData(formDefault);
-    if (isEditing) router.push("/note-editor");
+    if (isEditing) router.push("/home");
   }
 
   //---< wait for mounting complete >---
