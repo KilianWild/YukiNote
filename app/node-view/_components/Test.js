@@ -23,12 +23,12 @@ export function TextUpdaterNode(props) {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-16 bg-teal-500"
+        className="pointer-events-none opacity-0"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-16 bg-teal-500"
+        className="pointer-events-none opacity-0"
       />
     </div>
   );
