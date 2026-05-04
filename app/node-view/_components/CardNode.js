@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { Handle, Position } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-export function TextUpdaterNode(props) {
+export function CardNode(props) {
   const onChange = useCallback((evt) => {
     console.log(evt.target.value);
   }, []);

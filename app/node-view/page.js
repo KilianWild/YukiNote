@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { use, useCallback } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -11,13 +11,24 @@ import {
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
-import { TextUpdaterNode } from "./_components/Test";
+import { CardNode } from "./_components/CardNode";
+import { CenterNode } from "./_components/CenterNode";
+import { useRouter } from "next/navigation";
+
+import useGesture from "@/hooks/useGesture";
 
 import FloatingEdge from "./_components/FloatingEdge";
 import FloatingConnectionLine from "./_components/FloatingConnectionLine";
 
+import { useGlobalContext } from "../global-provider";
+import { useEffect } from "react";
+
 export default function NodeView() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const { notes, setNotes } = useGlobalContext();
+
+  const router = useRouter();
+
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const onConnect = useCallback(
     (params) =>
@@ -34,6 +45,13 @@ export default function NodeView() {
     [setEdges],
   );
 
+  useEffect(() => {
+    initializeNodes(notes, setNodes);
+  }, []);
+
+  useGesture(50, (direction) => {
+    if (direction === "right") router.push("/note-editor");
+  });
   return (
     <div className="floating-edges" style={{ width: "100%", height: "100vh" }}>
       <ReactFlow
@@ -58,23 +76,28 @@ const edgeTypes = {
 };
 
 const nodeTypes = {
-  textUpdater: TextUpdaterNode,
+  note: CardNode,
+  center: CenterNode,
 };
 
-const initialNodes = [
-  {
-    id: "n1",
-    position: { x: 0, y: 0 },
-    type: "textUpdater",
-    data: { label: "Node 1" },
-  },
-  {
-    id: "n2",
-    position: { x: 0, y: 100 },
-    type: "textUpdater",
-    data: { label: "Node 2" },
-  },
-];
+function initializeNodes(notes, setNodes) {
+  const initialNodes = [
+    {
+      id: "n1",
+      position: { x: 0, y: 0 },
+      type: "center",
+      data: { label: "Node 1" },
+    },
+    {
+      id: "n2",
+      position: { x: 0, y: 100 },
+      type: "note",
+      data: { label: "Node 2" },
+    },
+  ];
+
+  setNodes(initialNodes);
+}
 
 const initialEdges = [
   {
