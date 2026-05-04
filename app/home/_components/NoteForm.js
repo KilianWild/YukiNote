@@ -25,8 +25,27 @@ export default function NoteForm({ noteToEdit }) {
     const formDataObject = new FormData(event.target);
     const data = Object.fromEntries(formDataObject);
 
+    //---< assemble note data >---
+    const newNote = {
+      _id: !noteToEdit ? uuidv4() : noteToEdit._id,
+      location: " - ",
+      ...data,
+    };
+
+    //---< local storage handling >---
+    if (!noteToEdit) setNotes([newNote, ...notes]);
+    else
+      setNotes(
+        notes.map((note) =>
+          note._id === noteToEdit._id ? { _id: note.id, ...data } : note,
+        ),
+      );
+
+    //---< reset form >---
+    setFormData(formDefault);
+
     //---< get location >---
-    let location = "";
+    let location = null;
     try {
       const latitude = 48.1427456; // temp fixed coordinate
       const longitude = 11.5572736; // temp fixed coordinate
@@ -41,33 +60,14 @@ export default function NoteForm({ noteToEdit }) {
       location = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          noteToEdit
-            ? `${res.status} - Failed to update note!`
-            : `${res.status} - Failed to add note!`,
-        );
+        location = { adress: { city: " - " } };
+        throw new Error(`${res.status} - Failed to aquire location!`);
       }
     } catch (error) {
+      location = { adress: { city: " - " } };
       console.error("failed to get location", error);
     }
 
-    //---< assemble note data >---
-    const newNote = {
-      _id: !noteToEdit ? uuidv4() : noteToEdit._id,
-      location: location.address.city,
-      ...data,
-    };
-
-    //---< local storage handling >---
-    if (!noteToEdit) setNotes([newNote, ...notes]);
-    else
-      setNotes(
-        notes.map((note) =>
-          note._id === noteToEdit._id ? { _id: note.id, ...data } : note,
-        ),
-      );
-
-    console.log("New Note: ", newNote);
     //---< database handling - "PUT" , "POST" >---
     try {
       const url = `/api/notes${noteToEdit ? "/" + newNote._id : ""}`;
@@ -89,9 +89,6 @@ export default function NoteForm({ noteToEdit }) {
     } catch (error) {
       console.error("failed to connect with database", error);
     }
-
-    //---< reset form >---
-    setFormData(formDefault);
   }
 
   function handleClearForm() {
