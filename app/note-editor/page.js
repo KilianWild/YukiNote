@@ -16,6 +16,7 @@ export function HomeContent() {
 
   useGesture(50, (direction) => {
     if (direction === "right") router.push("/notes-list");
+    if (direction === "left") router.push("/node-view");
   });
 
   //---< rendering:

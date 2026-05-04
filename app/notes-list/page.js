@@ -31,7 +31,7 @@ export default function NoteList() {
   }
 
   useGesture(50, (direction) => {
-    if (direction === "left") router.push("/home");
+    if (direction === "left") router.push("/note-editor");
   });
 
   //---< rendering:

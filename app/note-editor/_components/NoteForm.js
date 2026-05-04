@@ -93,7 +93,7 @@ export default function NoteForm({ noteToEdit }) {
 
   function handleClearForm() {
     setFormData(formDefault);
-    if (isEditing) router.push("/home");
+    if (isEditing) router.push("/note-editor");
   }
 
   //---< wait for mounting complete >---
