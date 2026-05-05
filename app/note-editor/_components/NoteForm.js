@@ -112,19 +112,24 @@ export default function NoteForm({ noteToEdit }) {
         } else {
           console.warn("Failed to fetch location:", error.message);
         }
-        return { address: { city: " - " } };
+        return;
       }
     }
 
     const currentLocation = await getLocation();
 
-    console.log("currentLocation", currentLocation);
-    console.log("currentLocation CITY", currentLocation.address.city);
+    const city =
+      currentLocation.address.city ??
+      currentLocation.address.town ??
+      currentLocation.address.village ??
+      currentLocation.address.municipality ??
+      currentLocation.address.county ??
+      " - ";
 
     //---< assemble note data >---
     const newNote = {
       _id: !noteToEdit ? uuidv4() : noteToEdit._id,
-      location: currentLocation?.address?.city,
+      location: city,
       ...data,
     };
 
