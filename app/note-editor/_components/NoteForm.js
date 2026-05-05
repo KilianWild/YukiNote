@@ -37,60 +37,14 @@ export default function NoteForm({ noteToEdit }) {
         });
       });
     }
-    /*
-    try {
-      //---< get coordinates >---
-      const position = await getPosition();
-      const { latitude, longitude, accuracy } = position.coords;
-
-      console.log("latitude ", latitude, " longitude ", longitude);
-
-      //---< get location >---
-      const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10`;
-      const method = "GET";
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const currentLocation = await res.json();
-      console.log(currentLocation, currentLocation);
-
-      if (!res.ok) {
-        currentLocation.address.city = " - ";
-        throw new Error(`${res.status} - Failed to aquire location!`);
-      }
-    } catch (error) {
-      if (error instanceof GeolocationPositionError) {
-        switch (error.code) {
-          case 1:
-            console.warn("Permission denied");
-            break;
-          case 2:
-            console.warn("Position unavailable");
-            break;
-          case 3:
-            console.warn("Timeout");
-            break;
-        }
-      } else {
-        currentLocation.address.city = " - ";
-        console.warn("Failed to fetch location:", error.message);
-      }
-    }
-      */
 
     async function getLocation() {
       try {
         const position = await getPosition();
         const { latitude, longitude } = position.coords;
 
-        console.log("latitude ", latitude, " longitude ", longitude);
-
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10`;
         const res = await fetch(url, { method: "GET" });
-
-        console.log("location ", res);
 
         if (!res.ok)
           throw new Error(`${res.status} - Failed to acquire location!`);
@@ -117,7 +71,6 @@ export default function NoteForm({ noteToEdit }) {
     }
 
     const currentLocation = await getLocation();
-
     const city =
       currentLocation.address.city ??
       currentLocation.address.town ??
