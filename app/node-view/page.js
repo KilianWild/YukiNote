@@ -101,7 +101,44 @@ function initializeNodes(notes, setNodes, handleClickEdit) {
     return acc;
   }, []);
 
-  console.log("clusters", clusters);
+  function buildNodeTree(nodes) {
+    const referenceLookup = {};
+
+    nodes.notes.forEach((node) => {
+      referenceLookup[node._id] = { node: node, children: [] };
+    });
+
+    nodes.notes.forEach((note, index) => {
+      if (note.reference) {
+        if (!referenceLookup[note.reference]) {
+          console.warn(
+            "missing parent for note",
+            note._id,
+            "reference:",
+            note.reference,
+          );
+          return;
+        }
+        referenceLookup[note.reference].children.push(
+          referenceLookup[note._id],
+        );
+      }
+    });
+    nodes.notes.forEach((note) => {
+      if (note.reference) delete referenceLookup[note._id];
+    });
+    return referenceLookup;
+  }
+
+  const nodeTrees = (() => {
+    const tree = [];
+    clusters.forEach((cluster, index) => {
+      tree.push(buildNodeTree(clusters[index]));
+    });
+    return tree;
+  })();
+
+  console.log("nodeTrees: ", nodeTrees);
 
   const nodeData = clusters.map((cluster, index) => {
     //---< compute center node >---
@@ -142,6 +179,13 @@ function initializeNodes(notes, setNodes, handleClickEdit) {
       };
     });
   });
+
+  //
+  //
+  //
+  //
+  //
+  //
 
   //---< position center node >---
   const centerNode =

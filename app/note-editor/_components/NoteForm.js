@@ -11,6 +11,7 @@ export default function NoteForm({ noteToEdit }) {
     title: "",
     text: "",
     inquiry: "",
+    reference: "",
   };
   const { notes, setNotes } = useGlobalContext();
   const [mounted, setMounted] = useState(false);
@@ -85,7 +86,6 @@ export default function NoteForm({ noteToEdit }) {
       _id: !noteToEdit ? uuidv4() : noteToEdit._id,
       location: city,
       ...data,
-      reference: "",
     };
 
     //---< local storage handling >---
@@ -175,6 +175,16 @@ export default function NoteForm({ noteToEdit }) {
         }
         value={formData.inquiry}
         placeholder="Theme of Inquiry"
+        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
+      />
+      <input
+        name="reference"
+        type="text"
+        onChange={(event) =>
+          setFormData((prev) => ({ ...prev, reference: event.target.value }))
+        }
+        value={formData.reference}
+        placeholder="Reference"
         className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
       />
 
