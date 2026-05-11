@@ -27,7 +27,7 @@ export default function NoteList() {
       throw new Error(`${res.status} - Failed to delete note!`);
     }
 
-    setNotes((prev) => prev.filter((note) => (note._id !== id ? note : null)));
+    setNotes((prev) => prev.filter((note) => note._id !== id));
   }
 
   useGesture(50, (direction) => {

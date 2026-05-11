@@ -5,6 +5,8 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 
+import logger from "@/lib/logger";
+
 export default function NoteForm({ noteToEdit }) {
   const router = useRouter();
   const formDefault = {
@@ -118,6 +120,41 @@ export default function NoteForm({ noteToEdit }) {
     } catch (error) {
       console.error("failed to connect with database", error);
     }
+
+    const aiResponse = { data: "" };
+
+    //---< ai contextual process request - "POST" >---
+    try {
+      const url = `/api/gemini`;
+      const method = "POST";
+
+      const quote1 =
+        "This is the real secret of life -- to be completely engaged with what you are doing in the here and now. And instead of calling it work, realize it is play";
+      const quote2 = newNote.text;
+      const task = `the data will contain two philosophical quotes. Destill them in exactly 5 words to represent the quote, and define teh realtions. I want you to return me an Object with teh follwoing structure: 
+        {quote1: < 5 Tags -> String > , quote2: 5 Tags -> String , rel: < relationship connected yes or no >}`;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task, quote1, quote2 }),
+      });
+
+      if (!res.ok) {
+        throw new Error(
+          `${res.status} - contextual processing request failed!`,
+        );
+      }
+
+      aiResponse.data = await res.json();
+    } catch (error) {
+      console.error("failed to connect with ai service", error);
+    }
+
+    logger.ai(
+      "The following data has been computed by gimini ai >",
+      aiResponse.data,
+    );
   }
 
   function handleClearForm() {
