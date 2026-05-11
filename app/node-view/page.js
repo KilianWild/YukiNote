@@ -3,7 +3,6 @@
 import React, { useCallback } from "react";
 import {
   ReactFlow,
-  addEdge,
   Background,
   useNodesState,
   useEdgesState,
@@ -14,7 +13,6 @@ import "@xyflow/react/dist/style.css";
 import { CardNode } from "./_components/CardNode";
 import { CenterNode } from "./_components/CenterNode";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import useGesture from "@/hooks/useGesture";
 
@@ -55,7 +53,6 @@ export default function NodeView() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
         minZoom={0.1}
         fitView
         edgeTypes={edgeTypes}
