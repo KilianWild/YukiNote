@@ -11,6 +11,7 @@ export default function NoteForm({ noteToEdit }) {
     title: "",
     text: "",
     inquiry: "",
+    reference: "",
   };
   const { notes, setNotes } = useGlobalContext();
   const [mounted, setMounted] = useState(false);
@@ -71,12 +72,13 @@ export default function NoteForm({ noteToEdit }) {
     }
 
     const currentLocation = await getLocation();
+
     const city =
-      currentLocation.address.city ??
-      currentLocation.address.town ??
-      currentLocation.address.village ??
-      currentLocation.address.municipality ??
-      currentLocation.address.county ??
+      currentLocation?.address?.city ??
+      currentLocation?.address?.town ??
+      currentLocation?.address?.village ??
+      currentLocation?.address?.municipality ??
+      currentLocation?.address?.county ??
       " - ";
 
     //---< assemble note data >---
@@ -120,7 +122,7 @@ export default function NoteForm({ noteToEdit }) {
 
   function handleClearForm() {
     setFormData(formDefault);
-    if (isEditing) router.push("/home");
+    if (isEditing) router.push("/note-editor");
   }
 
   //---< wait for mounting complete >---
@@ -173,6 +175,16 @@ export default function NoteForm({ noteToEdit }) {
         }
         value={formData.inquiry}
         placeholder="Theme of Inquiry"
+        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
+      />
+      <input
+        name="reference"
+        type="text"
+        onChange={(event) =>
+          setFormData((prev) => ({ ...prev, reference: event.target.value }))
+        }
+        value={formData.reference}
+        placeholder="Reference"
         className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
       />
 
