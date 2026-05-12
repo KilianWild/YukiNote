@@ -128,11 +128,8 @@ export default function NoteForm({ noteToEdit }) {
       const url = `/api/gemini`;
       const method = "POST";
 
-      const quote1 =
-        "This is the real secret of life -- to be completely engaged with what you are doing in the here and now. And instead of calling it work, realize it is play";
-      const quote2 = newNote.text;
-      const task = `the data will contain two philosophical quotes. Destill them in exactly 5 words to represent the quote, and define teh realtions. I want you to return me an Object with teh follwoing structure: 
-        {quote1: < 5 Tags -> String > , quote2: 5 Tags -> String , rel: < relationship connected yes or no >}`;
+      const task = `the task is to return me an array of objectes with the same number of notes that were sent. And create referencelink them so that node trees can be build. If no "theme of inquiry" (center node) is given, then the note is eithr
+      to be referenced to an existing theme/node or a new theme of inquiry is to be named. If no note is given, then that means the note was already placed and destilled into a short description and 5 tags and referenced.`;
 
       const res = await fetch(url, {
         method,

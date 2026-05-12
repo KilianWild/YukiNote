@@ -12,8 +12,6 @@ export function HomeContent() {
 
   const editId = searchparams.get("editid");
 
-  console.log("notes", notes);
-
   const noteToEdit = notes.find((note) => note._id === editId);
 
   useGesture(50, (direction) => {
