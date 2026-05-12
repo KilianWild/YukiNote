@@ -13,6 +13,9 @@ import "@xyflow/react/dist/style.css";
 
 import { CenterNode } from "./_components/CenterNode";
 import { CenterNodeUnnamed } from "./_components/CenterNodeUnnamed";
+import { CenterNodeDirectQuestion } from "./_components/CenterNodeDirectQuestion";
+import { CenterNodeDiscrepancy } from "./_components/CenterNodeDiscrepancy";
+import { CenterNodeInquiryOpen } from "./_components/CenterNodeInquiryOpen";
 
 import { CardNode } from "./_components/CardNode";
 import { CardNodeDirectQuestion } from "./_components/CardNodeDirectQuestion";
@@ -91,7 +94,7 @@ export default function NodeView() {
       const method = "POST";
       const task = `Analyze the provided notes and return them as a structured JSON array. Apply the relationship, inquiry, and tree-mapping logic defined in the output schema to ensure each note is correctly categorized and referenced`;
 
-      logger.ai("New Request has been made", null);
+      logger.ai({ message: "New Request has been made" });
 
       const res = await fetch(url, {
         method,
@@ -100,9 +103,16 @@ export default function NodeView() {
       });
 
       if (!res.ok) {
-        throw new Error(
-          `${res.status} - contextual processing request failed!`,
-        );
+        if (res.status == 429) {
+          logger.ai({
+            status: "429",
+            message: "Too many requests!",
+          });
+          return;
+        } else
+          throw new Error(
+            `${res.status} - contextual processing request failed!`,
+          );
       }
 
       aiResponse.rawData = await res.json();
@@ -111,10 +121,17 @@ export default function NodeView() {
       console.error("failed to connect with ai service", error);
     }
 
-    logger.ai(
-      "The following data has been computed by gimini ai >",
-      aiResponse.parsedData,
-    );
+    logger.ai({
+      message: "The following data has been computed by gimini ai >",
+      data: aiResponse.parsedData,
+    });
+
+    //---< abort if ai request has failed >---
+    if (
+      !Array.isArray(aiResponse.parsedData) ||
+      aiResponse.parsedData.length === 0
+    )
+      return;
 
     const updatedNotes = aiResponse.parsedData.map((aiNote) => ({
       _id: aiNote._id,
@@ -206,6 +223,16 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
     return acc;
   }, []);
 
+  // ---< search cluster for notes that have specifc types of nodes >---
+  const enrichedClusters = clusters.map((cluster) => ({
+    ...cluster,
+    hasDiscrepancy: cluster.notes?.some(
+      (note) => note.discrepancyRefs?.length > 0,
+    ),
+    hasDirectQuestion: cluster.notes?.some((note) => note.directQuestion),
+    hasInquiryOpen: cluster.notes?.some((note) => note.inquiryOpen),
+  }));
+
   // ---< build the tree structure for every cluster >---
   function buildNodeTree(cluster) {
     const referenceLookup = {};
@@ -243,7 +270,7 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
     };
   }
 
-  const nodeTrees = clusters.map((cluster) => buildNodeTree(cluster));
+  const nodeTrees = enrichedClusters.map((cluster) => buildNodeTree(cluster));
 
   // ---< place all clusters side by side >---
   const rfNodes = [];
@@ -263,8 +290,25 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
     const centerY = 0;
     const centerId = `c${clusterIndex}`;
 
+    // ---< determine center node type >---
     let nodeType = null;
-    if (!clusters[clusterIndex].cluster) nodeType = "centerUnnamed";
+    if (
+      enrichedClusters[clusterIndex].cluster &&
+      enrichedClusters[clusterIndex].hasDiscrepancy
+    )
+      nodeType = "centerDiscrepancy";
+    else if (
+      enrichedClusters[clusterIndex].cluster &&
+      enrichedClusters[clusterIndex].hasDirectQuestion
+    )
+      nodeType = "centerDirectQuestion";
+    else if (
+      enrichedClusters[clusterIndex].cluster &&
+      enrichedClusters[clusterIndex].hasInquiryOpen
+    )
+      nodeType = "centerInquiryOpen";
+    else if (!enrichedClusters[clusterIndex].cluster)
+      nodeType = "centerUnnamed";
     else nodeType = "center";
 
     // ---< center node = Theme of Inquiry label >---
@@ -272,7 +316,7 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
       id: centerId,
       position: { x: centerX, y: centerY },
       type: nodeType,
-      data: { inquiry: clusters[clusterIndex].cluster },
+      data: { inquiry: enrichedClusters[clusterIndex].cluster },
       height: cardHeight,
     });
 
@@ -314,6 +358,9 @@ const nodeTypes = {
   inquiryOpen: CardNodeInquiryOpen,
   note: CardNode,
   center: CenterNode,
+  centerDirectQuestion: CenterNodeDirectQuestion,
+  centerDiscrepancy: CenterNodeDiscrepancy,
+  centerInquiryOpen: CenterNodeInquiryOpen,
   centerUnnamed: CenterNodeUnnamed,
 };
 
@@ -363,19 +410,6 @@ function placeNodes(
 ) {
   const allDirs = [0, 60, 120, 180, 240, 300];
 
-  /*
-  // ---< lock destination back to teh parent >---
-  const backDir = incomingDeg !== null ? (incomingDeg + 180) % 360 : null;
-  const availDirs =
-    backDir !== null ? allDirs.filter((d) => d !== backDir) : allDirs;
-
-  // ---< Sort available directions: first same then left/right >---
-  const forwardDir = incomingDeg ?? 0;
-  const sortedDirs = sortByProximity(availDirs, forwardDir);
-
-
-  */
-
   // ---< lock destination back to teh parent >---
 
   const backDir = incomingDeg !== null ? (incomingDeg + 180) % 360 : null;
@@ -384,9 +418,6 @@ function placeNodes(
     backDir !== null ? allDirs.filter((d) => d !== backDir) : allDirs;
 
   // ---< Sort available directions >---
-  // Center node (incomingDeg === null): spread evenly first (0°, 120°, 240°), then fill gaps (300°, 60°, 180°)
-  // All other nodes: fan out from forward direction as before
-
   const spreadOrder = [0, 120, 240, 300, 60, 180];
 
   const sortedDirs =
@@ -395,7 +426,6 @@ function placeNodes(
       : sortByProximity(availDirs, incomingDeg);
 
   entry.children.forEach((child, i) => {
-    console.log("child", child);
     // ---< Max 5 children per node (6 directions minus back = 5) >---
     if (i >= sortedDirs.length) return;
 

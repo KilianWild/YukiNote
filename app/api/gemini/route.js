@@ -11,10 +11,10 @@ export async function POST(request) {
       Notes to process: "${JSON.stringify(aiRequestData)}"`;
 
     // ---< Check token count first >---
-    const countResult = await ai.models.countTokens({
+    /*const countResult = await ai.models.countTokens({
       model: "gemini-2.5-flash",
       contents: prompt,
-    });
+    });*/
 
     console.log("Tokens in prompt:", countResult.totalTokens);
 
@@ -112,7 +112,8 @@ export async function POST(request) {
               inquiryOpen: {
                 type: "boolean",
                 description: ` Automatically true if directQuestion == true
-                  Also True if the note poses a new question AND REQUIRES further exploration to be able stand as it is. False if it provides an answer or is a factual statement.`,
+                  Also True if the note poses a new question AND REQUIRES further exploration to be able stand as it is. False if it provides an answer or is a factual statement.
+                  IMPORTANT: Don't overuse that. Only use it if the note is meaningfull, but has partial information where it is evident that it is only partial to help complete a thought, not to lead towards evey note being ULTIMATELY coherent and complete`,
               },
 
               referenceReasoning: {
@@ -162,13 +163,20 @@ export async function POST(request) {
   } catch (error) {
     console.error("--- FULL GEMINI ERROR ---");
     console.error(JSON.stringify(error, null, 2));
-
-    return Response.json(
-      {
-        error: "Failed to process task",
-        details: error.message || "Unknown error",
-      },
-      { status: 500 },
-    );
+    if (error.status == 429)
+      return Response.json(
+        {
+          error: "Too many requests",
+        },
+        { status: error.status },
+      );
+    else
+      return Response.json(
+        {
+          error: "Failed to process task",
+          details: error.message || "Unknown error",
+        },
+        { status: error.status },
+      );
   }
 }
