@@ -16,17 +16,32 @@ export async function POST(request) {
       contents: prompt,
     });*/
 
-    console.log("Tokens in prompt:", countResult.totalTokens);
+    console.log("prompt", prompt);
+
+    //console.log("Tokens in prompt:", countResult.totalTokens);
 
     // ---< Limit token Count >---
-    if (countResult.totalTokens > 7000) {
-      return Response.json({ error: "Prompt is too long!" }, { status: 400 });
-    }
+    //if (countResult.totalTokens > 7000) {
+    //  return Response.json({ error: "Prompt is too long!" }, { status: 400 });
+    //}
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      //model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_NONE",
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_NONE",
+          },
+        ],
 
         responseSchema: {
           type: "array",
@@ -145,6 +160,11 @@ export async function POST(request) {
         },
       },
     });
+
+    console.log(
+      "Usage Metadata:",
+      JSON.stringify(response.usageMetadata, null, 2),
+    );
 
     // ---< check for finish reason >---
     const candidate = response.candidates[0];

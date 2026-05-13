@@ -116,6 +116,12 @@ export default function NodeView() {
       }
 
       aiResponse.rawData = await res.json();
+      if (!aiResponse.rawData.result) {
+        logger.ai({
+          message: "Gemini returned an empty string - Output Token used up?",
+        });
+        return;
+      }
       aiResponse.parsedData = JSON.parse(aiResponse.rawData.result);
     } catch (error) {
       console.error("failed to connect with ai service", error);
