@@ -24,6 +24,7 @@ export function HomeContent() {
   return (
     <section className="flex h-screen w-full items-center justify-center bg-zinc-950 p-4">
       <NoteForm noteToEdit={noteToEdit} />
+      <h4 className="absolute right-7 bottom-6 text-zinc-400">悠軌Note</h4>
     </section>
   );
 }

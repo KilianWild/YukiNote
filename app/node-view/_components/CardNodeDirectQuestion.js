@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { Handle, Position } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-export function CardNode({ height, data }) {
+export function CardNodeDirectQuestion({ height, data }) {
   const { note, onClickEdit, deltaNoteDist, deltaCenterDist } = data;
 
   const onChange = useCallback((evt) => {
@@ -14,7 +14,7 @@ export function CardNode({ height, data }) {
     <div
       style={{ width: `${height}px`, height: `${height}px` }}
       onDoubleClick={() => onClickEdit(note._id)}
-      className="flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 p-6 px-1 py-0.5"
+      className="flex items-center justify-center rounded-md border-2 border-indigo-700 bg-gray-800 px-1 py-0.5"
     >
       <div className="absolute top-2 right-2 left-2 text-xs">{note.title}</div>
       <div className="h-12 w-16 border border-gray-600 bg-gray-900"></div>

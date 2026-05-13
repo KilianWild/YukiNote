@@ -12,8 +12,8 @@ export async function POST(request) {
   await dbConnect();
 
   try {
-    const body = await request.json();
-    const note = await Note.create(body);
+    const notes = await request.json();
+    const note = await Note.create(notes);
 
     return Response.json(note, { status: 201 });
   } catch (error) {

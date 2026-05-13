@@ -27,7 +27,7 @@ export default function NoteList() {
       throw new Error(`${res.status} - Failed to delete note!`);
     }
 
-    setNotes((prev) => prev.filter((note) => (note._id !== id ? note : null)));
+    setNotes((prev) => prev.filter((note) => note._id !== id));
   }
 
   useGesture(50, (direction) => {
@@ -42,6 +42,8 @@ export default function NoteList() {
         handleClickEdit={handleClickEdit}
         handleClickDelete={handleClickDelete}
       />
+      <h4 className="fixed right-7 bottom-6 text-zinc-400">悠軌Note</h4>
+      <div className="pb-10"></div>
     </>
   );
 }

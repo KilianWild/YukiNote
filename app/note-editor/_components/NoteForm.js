@@ -5,6 +5,8 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 
+import { notesApiPutPost } from "@/lib/api";
+
 export default function NoteForm({ noteToEdit }) {
   const router = useRouter();
   const formDefault = {
@@ -98,26 +100,8 @@ export default function NoteForm({ noteToEdit }) {
       );
 
     //---< database handling - "PUT" , "POST" >---
-    try {
-      const url = `/api/notes${noteToEdit ? "/" + newNote._id : ""}`;
-      const method = noteToEdit ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newNote),
-      });
-
-      if (!res.ok) {
-        throw new Error(
-          noteToEdit
-            ? `${res.status} - Failed to update note!`
-            : `${res.status} - Failed to add note!`,
-        );
-      }
-    } catch (error) {
-      console.error("failed to connect with database", error);
-    }
+    if (noteToEdit) notesApiPutPost("PUT", newNote, noteToEdit._id);
+    else notesApiPutPost("POST", newNote);
   }
 
   function handleClearForm() {
@@ -138,71 +122,62 @@ export default function NoteForm({ noteToEdit }) {
   //---< rendering:
   //---------------------------------------------------------------------------------------
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex h-full w-full flex-col justify-center bg-zinc-900 p-6"
-    >
-      <h2 className="self-center text-lg font-semibold text-zinc-700">
-        New Note
-      </h2>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="flex h-full w-full flex-col justify-center bg-zinc-900 p-6"
+      >
+        <h2 className="self-center text-lg text-[#5f5f5f]">New Note:</h2>
 
-      <input
-        name="title"
-        type="text"
-        value={formData.title}
-        onChange={(event) => {
-          setFormData((prev) => ({ ...prev, title: event.target.value }));
-        }}
-        placeholder="Title"
-        className="mt-3 w-[80%] border-b-2 border-[#4a4a6a] p-2 text-sm focus:outline-none"
-      />
+        <input
+          name="title"
+          type="text"
+          value={formData.title}
+          onChange={(event) => {
+            setFormData((prev) => ({ ...prev, title: event.target.value }));
+          }}
+          placeholder="Title"
+          className="mt-3 w-[80%] border-b-2 border-[#4a4a6a] p-2 text-sm text-zinc-300 focus:outline-none"
+        />
 
-      <textarea
-        name="text"
-        value={formData.text}
-        onChange={(event) =>
-          setFormData((prev) => ({ ...prev, text: event.target.value }))
-        }
-        placeholder="Write your note..."
-        className="notebook mt-3 mb-0 flex-1 resize-none rounded border-none px-2 pb-2 text-sm focus:outline-none"
-      />
+        <textarea
+          name="text"
+          value={formData.text}
+          onChange={(event) =>
+            setFormData((prev) => ({ ...prev, text: event.target.value }))
+          }
+          placeholder="Write your note..."
+          className="notebook mt-3 mb-0 flex-1 resize-none rounded border-none px-2 pb-2 text-sm text-zinc-300 focus:outline-none"
+        />
 
-      <input
-        name="inquiry"
-        type="text"
-        onChange={(event) =>
-          setFormData((prev) => ({ ...prev, inquiry: event.target.value }))
-        }
-        value={formData.inquiry}
-        placeholder="Theme of Inquiry"
-        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
-      />
-      <input
-        name="reference"
-        type="text"
-        onChange={(event) =>
-          setFormData((prev) => ({ ...prev, reference: event.target.value }))
-        }
-        value={formData.reference}
-        placeholder="Reference"
-        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
-      />
+        <input
+          name="inquiry"
+          type="text"
+          onChange={(event) =>
+            setFormData((prev) => ({ ...prev, inquiry: event.target.value }))
+          }
+          value={formData.inquiry}
+          placeholder="Theme of Inquiry"
+          className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm text-zinc-300 focus:outline-none"
+        />
 
-      <div className="mt-10 flex flex-row justify-center gap-3">
-        <button
-          type="button"
-          onClick={handleClearForm}
-          className="rounded bg-teal-600 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-300"
-        >
-          {isEditing ? "Cancel" : "Clear"}
-        </button>
-        <button
-          type="submit"
-          className="rounded bg-teal-600 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-300"
-        >
-          {isEditing ? "Update Note" : "Save Note"}
-        </button>
-      </div>
-    </form>
+        <div className="mt-10 flex flex-row justify-center gap-3">
+          <button
+            type="button"
+            onClick={handleClearForm}
+            className="rounded bg-teal-600 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-300"
+          >
+            {isEditing ? "Cancel" : "Clear"}
+          </button>
+          <button
+            type="submit"
+            className="rounded bg-teal-600 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-300"
+          >
+            {isEditing ? "Update Note" : "Save Note"}
+          </button>
+        </div>
+      </form>
+    
+    </>
   );
 }
