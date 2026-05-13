@@ -16,7 +16,7 @@ export function CardNodeUnrefed({ height, data }) {
       onDoubleClick={() => onClickEdit(note._id)}
       className="flex items-center justify-center rounded-md border border-gray-800 bg-gray-900 px-1 py-0.5"
     >
-      <div className="absolute top-1 left-2 text-xs">{note.title}</div>
+      <div className="absolute top-2 right-2 left-2 text-xs">{note.title}</div>
       <div className="h-12 w-16 border border-gray-800 bg-gray-900"></div>
       <div className="absolute right-2 bottom-1 text-right text-xs text-gray-500">
         {note.location}

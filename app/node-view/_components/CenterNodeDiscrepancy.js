@@ -11,7 +11,7 @@ export function CenterNodeDiscrepancy({ data, height }) {
   return (
     <div
       style={{ width: `${height}px`, height: `${height}px` }}
-      className="flex items-center justify-center rounded-full border-3 border-rose-600 bg-gray-800 px-1 py-0.5"
+      className="flex items-center justify-center rounded-full border-3 border-rose-600 bg-gray-800 p-2 px-1 py-0.5"
     >
       <div className="flex items-center justify-center text-center">
         {data.inquiry}

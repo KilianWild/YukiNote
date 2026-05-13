@@ -64,8 +64,6 @@ export default function NodeView() {
       return acc;
     }, []);
 
-    console.log("existingInquiries", existingInquiries);
-
     //---< assemble data for ai ref request >---
     const aiRequestData = notes.map((note) => {
       const aiData = {
@@ -75,7 +73,6 @@ export default function NodeView() {
         text: note.isReferenced ? "" : note.text,
         shortDescr: note.shortDescr,
         tags: note.tags,
-
         inquiry: note.inquiry,
         referenceId: note.referenceId,
         referenceTitle: note.referenceTitle,
@@ -92,7 +89,8 @@ export default function NodeView() {
     try {
       const url = `/api/gemini`;
       const method = "POST";
-      const task = `Analyze the provided notes and return them as a structured JSON array. Apply the relationship, inquiry, and tree-mapping logic defined in the output schema to ensure each note is correctly categorized and referenced`;
+      const task = `Analyze the provided notes and return them as a structured JSON array. Apply the relationship, inquiry, and tree-mapping logic defined in the output schema to ensure each note is correctly categorized and referenced
+      If no text is given, but tags and shortDescr, then use tags, shortDescr and other info like discrepancyRefs, directQuestion etc. to get context of the note for other note-referencing`;
 
       logger.ai({ message: "New Request has been made" });
 
@@ -179,24 +177,21 @@ export default function NodeView() {
   //---------------------------------------------------------------------------------------
   return (
     <>
-      <div
-        className="floating-edges"
-        style={{ width: "100%", height: "100vh" }}
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          minZoom={0.1}
-          fitView
-          edgeTypes={edgeTypes}
-          nodeTypes={nodeTypes}
-          proOptions={{ hideAttribution: true }}
-          connectionLineComponent={FloatingConnectionLine}
-        >
-          <Background />
-        </ReactFlow>
+      <div className="floating-edges h-full w-full p-4">
+        <div className="h-full w-full border border-[#262636] bg-[#111111]">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            minZoom={0.1}
+            fitView
+            edgeTypes={edgeTypes}
+            nodeTypes={nodeTypes}
+            proOptions={{ hideAttribution: true }}
+            connectionLineComponent={FloatingConnectionLine}
+          ></ReactFlow>
+        </div>
       </div>
       <div
         onClick={handleReferenceNodes}
@@ -281,19 +276,23 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
   // ---< place all clusters side by side >---
   const rfNodes = [];
   const rfEdges = [];
-  let clusterOffsetX = 0;
+  //let clusterOffsetX = 0;
 
-  nodeTrees.forEach((tree, clusterIndex) => {
-    // ---< estimate how much space this tree needs - boundary=circle >---
+  // ---< calculate cluzster radii >---
+  const radii = nodeTrees.map((tree) => {
     const nodeCount = tree.children.reduce(
       (sum, child) => sum + countNodes(child),
       0,
     );
-    const treeRadius =
-      Math.max(1, Math.ceil(Math.sqrt(nodeCount))) * deltaNoteDist;
+    return Math.max(1, Math.ceil(Math.sqrt(nodeCount))) * deltaNoteDist;
+  });
 
-    const centerX = clusterOffsetX + treeRadius;
-    const centerY = 0;
+  const clusterPositions = packClusters(radii, 150);
+
+  nodeTrees.forEach((tree, clusterIndex) => {
+    const centerX = clusterPositions[clusterIndex].x;
+    const centerY = clusterPositions[clusterIndex].y;
+
     const centerId = `c${clusterIndex}`;
 
     // ---< determine center node type >---
@@ -341,9 +340,10 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
       deltaNoteDist,
       deltaCenterDist,
     );
-
+    /*
     // ---< offset cluster - horizontal line only for now! >---
     clusterOffsetX += treeRadius * 2 + deltaNoteDist * 2;
+*/
   });
 
   // ---< second pass - push out colliding nodes >---
@@ -540,6 +540,91 @@ function resolveCollisions(rfNodes, minDist, iterations = 50) {
       }
     }
 
-    if (!moved) break; // --< no overlaps remaining
+    if (!moved) break; // ---< no overlaps remaining
   }
+}
+
+function packClusters(radii, gap = 100) {
+  if (radii.length === 0) return [];
+  const positions = [];
+
+  // ---< First circle at origin >---
+  positions.push({ x: 0, y: 0 });
+  if (radii.length === 1) return positions;
+
+  // ---< Second circle to the right >---
+  positions.push({ x: radii[0] + radii[1] + gap, y: 0 });
+  if (radii.length === 2) return positions;
+
+  // ---< Each subsequent circle: try tangent to every pair of placed circles,
+  // ---< pick the candidate closest to the centroid of placed circles
+  for (let k = 2; k < radii.length; k++) {
+    const r = radii[k];
+    let bestPos = null;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < k; i++) {
+      for (let j = i + 1; j < k; j++) {
+        const candidates = tangentCircles(
+          positions[i],
+          radii[i],
+          positions[j],
+          radii[j],
+          r,
+          gap,
+        );
+        for (const c of candidates) {
+          // ---< Check no overlap with existing circles >---
+          const overlaps = positions.some((p, idx) => {
+            const dx = c.x - p.x,
+              dy = c.y - p.y;
+            return Math.sqrt(dx * dx + dy * dy) < radii[idx] + r - 0.1;
+          });
+          if (overlaps) continue;
+
+          // ---< Pick closest to centroid >---
+          const cx = positions.reduce((s, p) => s + p.x, 0) / k;
+          const cy = positions.reduce((s, p) => s + p.y, 0) / k;
+          const dist = Math.sqrt((c.x - cx) ** 2 + (c.y - cy) ** 2);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestPos = c;
+          }
+        }
+      }
+    }
+
+    // ---< Fallback: just place it to the right if no tangent found >---
+    positions.push(
+      bestPos ?? { x: positions[k - 1].x + radii[k - 1] + r, y: 0 },
+    );
+  }
+
+  return positions;
+}
+
+// ---< Returns up to 2 positions where circle r is tangent to circles A and B >---
+function tangentCircles(a, ra, b, rb, r, gap = 100) {
+  const d1 = ra + r + gap;
+  const d2 = rb + r + gap;
+  const dx = b.x - a.x,
+    dy = b.y - a.y;
+  const d = Math.sqrt(dx * dx + dy * dy);
+
+  if (d > d1 + d2 || d < Math.abs(d1 - d2)) return []; // ---< no solution
+
+  const cosA = (d1 * d1 + d * d - d2 * d2) / (2 * d1 * d);
+  const sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
+  const angle = Math.atan2(dy, dx);
+
+  return [
+    {
+      x: a.x + d1 * Math.cos(angle + Math.acos(cosA)),
+      y: a.y + d1 * Math.sin(angle + Math.acos(cosA)),
+    },
+    {
+      x: a.x + d1 * Math.cos(angle - Math.acos(cosA)),
+      y: a.y + d1 * Math.sin(angle - Math.acos(cosA)),
+    },
+  ];
 }

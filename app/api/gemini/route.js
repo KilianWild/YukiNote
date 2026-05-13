@@ -62,8 +62,8 @@ export async function POST(request) {
 
               text: {
                 type: "string",
-                description: `The original content of the note. If no text is given, but tags and shortDescr, then use tags and shortDescr to get context of the note for other note-referencing
-                   DO NOT CHANGE THE WORDS OR SENTENCES - but correct spelling issues`,
+                description: `The original content of the note.
+                   DO NOT CHANGE THE WORDS OR SENTENCES BY MEANING - but correct only spelling issues and/or insert/change words that are GRAMMAR RELEVANT ONLY`,
               },
               tags: {
                 type: "array",

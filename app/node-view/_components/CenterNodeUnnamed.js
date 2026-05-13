@@ -11,7 +11,7 @@ export function CenterNodeUnnamed({ data, height }) {
   return (
     <div
       style={{ width: `${height}px`, height: `${height}px` }}
-      className="flex items-center justify-center rounded-full border border-gray-800 bg-gray-900 px-1 py-0.5"
+      className="flex items-center justify-center rounded-full border border-gray-800 bg-gray-900 p-2 px-1 py-0.5"
     >
       <div className="flex items-center justify-center text-center">
         {data.inquiry}
