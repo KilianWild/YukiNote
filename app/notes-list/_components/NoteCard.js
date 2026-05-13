@@ -17,12 +17,14 @@ export default function NoteCard({ note, onClickEdit, onClickDelete }) {
     window.addEventListener("click", (event) => handleClickOutside(event));
   }, []);
 
+  console.log("note", note);
+
   //---< rendering:
   //---------------------------------------------------------------------------------------
   return (
     <li
       onDoubleClick={() => onClickEdit(note._id)}
-      className="relative h-64 w-full bg-zinc-900"
+      className="relative h-50 w-full rounded-tl-lg rounded-br-lg border border-b-2 border-[#4a4a6a] bg-zinc-900"
     >
       <div ref={menuRef}>
         <button
@@ -55,14 +57,18 @@ export default function NoteCard({ note, onClickEdit, onClickDelete }) {
         )}
       </div>
 
-      <h3 className="absolute top-1 left-2">{note.title}</h3>
-      <p className="absolute top-10 left-2 whitespace-pre-line">
+      <h3 className="absolute top-3 left-3 font-bold text-zinc-300">
+        {note.title}
+      </h3>
+      <p className="absolute top-11 left-3 font-thin whitespace-pre-line text-zinc-400">
         {note.text.length > 250
           ? note.text.slice(0, 250).replace(/\r?\n/g, " ").trim() + " ..."
           : note.text.replace(/\r?\n/g, " ").trim()}
       </p>
-      <p className="absolute bottom-1 left-2 text-zinc-500">{note.location}</p>
-      <h4 className="absolute right-2 bottom-1">{note.inquiry}</h4>
+      <p className="absolute bottom-1 left-3 text-zinc-500">{note.location}</p>
+      <h4 className="absolute right-2 bottom-1 text-[#7e7eb4]">
+        {note.inquiry}
+      </h4>
       <h4 className="absolute right-2 bottom-7">{note.reference}</h4>
     </li>
   );

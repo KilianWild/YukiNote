@@ -138,7 +138,7 @@ export default function NoteForm({ noteToEdit }) {
           setFormData((prev) => ({ ...prev, title: event.target.value }));
         }}
         placeholder="Title"
-        className="mt-3 w-[80%] border-b-2 border-[#4a4a6a] p-2 text-sm focus:outline-none"
+        className="mt-3 w-[80%] border-b-2 border-[#4a4a6a] p-2 text-sm text-zinc-300 focus:outline-none"
       />
 
       <textarea
@@ -148,7 +148,7 @@ export default function NoteForm({ noteToEdit }) {
           setFormData((prev) => ({ ...prev, text: event.target.value }))
         }
         placeholder="Write your note..."
-        className="notebook mt-3 mb-0 flex-1 resize-none rounded border-none px-2 pb-2 text-sm focus:outline-none"
+        className="notebook mt-3 mb-0 flex-1 resize-none rounded border-none px-2 pb-2 text-sm text-zinc-300 focus:outline-none"
       />
 
       <input
@@ -159,7 +159,7 @@ export default function NoteForm({ noteToEdit }) {
         }
         value={formData.inquiry}
         placeholder="Theme of Inquiry"
-        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm focus:outline-none"
+        className="right-0 mt-0 w-[80%] self-end border-b-2 border-[#4a4a6a] px-2 pb-2 text-sm text-zinc-300 focus:outline-none"
       />
 
       <div className="mt-10 flex flex-row justify-center gap-3">

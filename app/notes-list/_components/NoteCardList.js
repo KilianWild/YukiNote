@@ -17,7 +17,7 @@ export default function NoteCardList({ handleClickEdit, handleClickDelete }) {
   //---< rendering:
   //---------------------------------------------------------------------------------------
   return (
-    <ul className="flex flex-col gap-2 p-4">
+    <ul className="flex flex-col gap-3 p-4">
       {notes.map((note, index) => {
         return (
           <NoteCard
