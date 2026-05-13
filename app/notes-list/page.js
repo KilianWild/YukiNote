@@ -42,6 +42,8 @@ export default function NoteList() {
         handleClickEdit={handleClickEdit}
         handleClickDelete={handleClickDelete}
       />
+      <h4 className="fixed right-7 bottom-6 text-zinc-400">悠軌Note</h4>
+      <div className="pb-10"></div>
     </>
   );
 }

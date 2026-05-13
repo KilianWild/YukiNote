@@ -178,7 +178,7 @@ export default function NodeView() {
   return (
     <>
       <div className="floating-edges h-full w-full p-4">
-        <div className="h-full w-full border border-[#262636] bg-[#111111]">
+        <div className="flex h-full w-full flex-col items-center justify-center border border-[#262636] bg-[#111111]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -195,10 +195,11 @@ export default function NodeView() {
       </div>
       <div
         onClick={handleReferenceNodes}
-        className="absolute right-10 bottom-10 h-14 w-14 rounded-full border border-zinc-400 bg-cyan-800 text-center text-sm leading-14 font-bold text-zinc-300"
+        className="absolute bottom-10 left-10 h-14 w-14 rounded-full border border-zinc-400 bg-cyan-800 text-center text-sm leading-14 font-bold text-zinc-300"
       >
         REF
       </div>
+      <h4 className="absolute right-7 bottom-6 text-zinc-400">悠軌Note</h4>
     </>
   );
 }
@@ -295,6 +296,11 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
 
     const centerId = `c${clusterIndex}`;
 
+    console.log(
+      " enrichedClusters[clusterIndex]",
+      enrichedClusters[clusterIndex],
+    );
+
     // ---< determine center node type >---
     let nodeType = null;
     if (
@@ -315,6 +321,10 @@ function initializeNodes(notes, setNodes, setEdges, handleClickEdit) {
     else if (!enrichedClusters[clusterIndex].cluster)
       nodeType = "centerUnnamed";
     else nodeType = "center";
+
+    console.log("nodeType", nodeType);
+
+    console.log("------------------------------------------------------------");
 
     // ---< center node = Theme of Inquiry label >---
     rfNodes.push({
@@ -446,7 +456,7 @@ function placeNodes(
     if (child.node.discrepancyRefs?.length > 0) nodeType = "discrepancy";
     else if (child.node.directQuestion) nodeType = "directQuestion";
     else if (child.node.inquiryOpen) nodeType = "inquiryOpen";
-    else if (child.node.referenceId === "center") nodeType = "note";
+    else if (child.node.referenceId) nodeType = "note";
     else nodeType = "unrefed";
 
     rfNodes.push({
