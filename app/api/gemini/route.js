@@ -121,8 +121,8 @@ export async function POST(request) {
               },
               directQuestion: {
                 type: "boolean",
-                description:
-                  "True only if the note contains directly in the note formulated questions that have not been answered within it. This does NOT include internal inconsistency or incompletion or internal discussions but direct questions that leave the note Intendedly open",
+                description: `True only if the note contains directly in the note formulated questions that have not been answered within it. This does NOT include internal inconsistency or incompletion or internal discussions but direct questions that leave the note Intendedly open
+                  If a quesiton is posed at the end of the note, its likely a directQueistion`,
               },
               inquiryOpen: {
                 type: "boolean",
