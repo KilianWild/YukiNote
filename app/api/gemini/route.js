@@ -90,7 +90,7 @@ export async function POST(request) {
               discrepancyRefs: {
                 type: "array",
                 description:
-                  "Array of _id strings that this note contradicts, challenges, or negates. Return[] if none exist. Focus most on notes within the same inquiry and only secondary globally",
+                  "Array of _id strings that this note contradicts or is contradicted by. DISCREPANCY ENFORCEMENT: If this note creates a discrepancy with note X, ensure note X also contains this note's _id in its discrepancyRefs. This must always be a reciprocal link.",
                 items: { type: "string" },
               },
               referenceId: {
@@ -126,10 +126,11 @@ export async function POST(request) {
               },
               inquiryOpen: {
                 type: "boolean",
-                description: ` Automatically true if directQuestion == true
-                  Also True if the note poses a new question AND REQUIRES further exploration to be able stand as it is. False if it provides an answer or is a factual statement.
-                  IMPORTANT: Ddnt overuse. Only use it if the note is meaningfull, but has partial information where it is visibly only partial, to help complete a thought, not to lead towards evey note being ULTIMATELY coherent and complete. 
-                  So words of uncertainty within the note or inconsistency within as well as facts already knwon missing in the note would trigger that`,
+                description: `Strictly follow this decision logic:
+    1. TRUE ONLY IF: The note poses an explicit question AND provides no resolution, OR the note highlights a gap where current knowledge/this note is demonstrably incomplete regarding the inquiry.
+    2. FALSE IF: The note makes a factual claim, provides a conclusion, or summarizes a completed thought, even if the topic is complex.
+    3. EXTERNAL KNOWLEDGE CHECK: If the note discusses a known philosophical/scientific debate, mark it TRUE ONLY if the note fails to present the consensus or the current state of that debate. 
+    Do not mark TRUE just because a topic is 'deep'; only mark TRUE if the internal or external context is missing a definitive resolution.`,
               },
 
               referenceReasoning: {
@@ -137,6 +138,12 @@ export async function POST(request) {
                 description:
                   "A brief justification for the chosen referenceId. If reasoning shows the selected referenceId was wrong => adjust referenceId string",
               },
+              directQuestionReasoning: {
+                type: "string",
+                description:
+                  "A brief justification for the chosen chosen directQuestion state. If reasoning shows the selected status was wrong => adjust directQuestion string",
+              },
+
               inquiryOpenReasoning: {
                 type: "string",
                 description:

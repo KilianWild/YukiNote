@@ -89,9 +89,15 @@ export default function NodeView() {
     try {
       const url = `/api/gemini`;
       const method = "POST";
-      const task = `Analyze the provided notes and return them as a structured JSON array. Apply the relationship, inquiry, and tree-mapping logic defined in the output schema to ensure each note is correctly categorized and referenced
+      const task = /* `Analyze the provided notes and return them as a structured JSON array. Apply the relationship, inquiry, and tree-mapping logic defined in the output schema to ensure each note is correctly categorized and referenced
       If no text is given, but tags and shortDescr, then use tags, shortDescr and other info like discrepancyRefs, directQuestion etc. to get context of the note for other note-referencing`;
+*/ `
 
+                1. GLOBAL ANALYSIS: First, read through all provided notes to identify overall themes and existing contradictions between them.
+                2. RECIPROCITY: Ensure all identified discrepancies are mapped bidirectionally (if A contradicts B, B must list A).
+                3. INQUIRY OPENNESS: Apply the 'inquiryOpen' status sparingly. Only mark as TRUE if the note is a 'Work in Progress' thought or contains an unresolved question. If the note makes a definitive statement, mark FALSE, even if the subject matter is complex or philosophical.
+                4. FORMATTING: Return the final structured JSON array based on the schema.
+                `;
       logger.ai({ message: "New Request has been made" });
 
       const res = await fetch(url, {
